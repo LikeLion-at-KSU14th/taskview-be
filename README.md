@@ -177,7 +177,6 @@ Compose의 `postgres`, `172.16.0.0/12`, TLS 해제는 로컬 스캔 검증 전�
 - `TASKVIEW_DATABASE_URL`, `TASKVIEW_AI_URL`, `TASKVIEW_PUBLIC_WEB_URL`을 운영 주소로 변경합니다.
 - `TASKVIEW_DELIVERY_ENCRYPTION_KEY`와 `TASKVIEW_DATA_SOURCE_ENCRYPTION_KEY`를 환경별로 새로 생성해 비밀 저장소에서 주입합니다. Compose 기본 key를 재사용하지 않습니다.
 - 운영 SMTP host/port/credential과 TLS 또는 STARTTLS를 설정합니다. Mailpit은 로컬 전용입니다.
-- Google OAuth를 사용할 때 client ID/secret/redirect URI를 운영 값으로 설정합니다.
 - source hostname/CIDR/CA는 필요한 값만 최소 허용하고 PostgreSQL 계정 자체도 read-only로 제한합니다.
 
 ## 검증

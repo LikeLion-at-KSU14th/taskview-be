@@ -58,14 +58,11 @@ from .auth import (
     NeedexAnalyticsPrincipal,
     NeedexArtifactsPrincipal,
     NeedexDataPrincipal,
-    OAuthConfigurationError,
-    OAuthExchangeError,
     SessionToken,
     WorkspaceAdmin,
     WorkspaceApiKeyPrincipal,
     WorkspaceOwner,
     WorkspacePrincipal,
-    complete_google_oauth,
     confirm_email_verification,
     hash_session_token,
     log_in,
@@ -75,14 +72,12 @@ from .auth import (
     revoke_session,
     rotate_session,
     sign_up,
-    start_google_oauth,
 )
 from .auth_schemas import (
     AuthSessionResponse,
     EmailVerificationConfirmRequest,
     EmailVerificationStatus,
     LoginRequest,
-    OAuthStartResponse,
     PasswordResetConfirmRequest,
     PasswordResetRequest,
     SignUpRequest,
@@ -412,40 +407,6 @@ async def refresh_session(token: SessionToken, user: CurrentUser) -> AuthSession
 async def logout(token: SessionToken) -> Response:
     await revoke_session(token, store)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@app.get("/v1/auth/oauth/google/start", response_model=OAuthStartResponse)
-async def google_oauth_start() -> OAuthStartResponse:
-    try:
-        return await start_google_oauth(get_settings(), store)
-    except OAuthConfigurationError as exc:
-        raise HTTPException(
-            status_code=503, detail="Google OAuth 환경 변수가 설정되지 않았습니다."
-        ) from exc
-
-
-@app.get("/v1/auth/oauth/google/callback", response_model=AuthSessionResponse)
-async def google_oauth_callback(
-    code: str = Query(min_length=4, max_length=4096),
-    state_token: str = Query(alias="state", min_length=32, max_length=256),
-) -> AuthSessionResponse:
-    try:
-        return await complete_google_oauth(
-            code=code,
-            state=state_token,
-            settings=get_settings(),
-            repository=store,
-        )
-    except OAuthConfigurationError as exc:
-        raise HTTPException(
-            status_code=503, detail="Google OAuth 환경 변수가 설정되지 않았습니다."
-        ) from exc
-    except OAuthExchangeError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except httpx.HTTPError as exc:
-        raise HTTPException(
-            status_code=503, detail="Google 인증 서비스에 연결하지 못했습니다."
-        ) from exc
 
 
 @app.get("/v1/auth/email-verifications/status", response_model=EmailVerificationStatus)

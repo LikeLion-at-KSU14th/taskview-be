@@ -189,6 +189,18 @@ def login(client: TestClient, email: str, user_password: str) -> tuple[dict, dic
     return payload, {"authorization": f"Bearer {payload['session_token']}"}
 
 
+def test_google_oauth_routes_are_not_exposed():
+    with TestClient(app) as client:
+        assert client.get("/v1/auth/oauth/google/start").status_code == 404
+        assert (
+            client.get(
+                "/v1/auth/oauth/google/callback",
+                params={"code": "test-code", "state": "test-state"},
+            ).status_code
+            == 404
+        )
+
+
 def create_preview(client: TestClient, headers: dict[str, str], ttl_days: int = 7) -> dict:
     response = client.post(
         "/v1/taskviews/preview",
