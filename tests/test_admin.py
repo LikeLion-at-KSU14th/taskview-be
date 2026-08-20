@@ -113,3 +113,21 @@ def test_audit_ui_does_not_invent_link_when_approval_has_no_contract():
     assert result.evidence is None
     assert result.evidenceId is None
     assert result.evidenceHash is None
+
+
+def test_audit_ui_renders_download_events_without_evidence_links():
+    view = approved_view()
+    event = audit_event(
+        event_id=4,
+        action="downloaded",
+        created_at=datetime(2026, 8, 18, 2, 2, tzinfo=UTC),
+    )
+
+    [result] = build_audit_ui([view], {view.id: [event]})
+
+    assert result.event == "DATA_DOWNLOADED"
+    assert result.result == "PASS"
+    assert result.tone == "success"
+    assert result.evidence is None
+    assert result.evidenceId is None
+    assert result.evidenceHash is None

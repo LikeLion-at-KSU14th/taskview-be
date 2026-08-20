@@ -240,6 +240,7 @@ def build_audit_ui(
         "approved": ("APPROVED", "PASS", "success"),
         "approved_alternative": ("APPROVED", "SAFE ALT", "safe"),
         "rejected": ("POLICY_CHECK", "DENY", "danger"),
+        "downloaded": ("DATA_DOWNLOADED", "PASS", "success"),
     }
     for view_id, events in events_by_view.items():
         view = view_by_id[view_id]
