@@ -77,7 +77,7 @@ async def issue_session(
         token_hash=hash_session_token(token),
         expires_at=expires_at,
     )
-    if not user.email_verified:
+    if settings.taskview_require_email_verification and not user.email_verified:
         next_path = "/verify-email"
     elif user.onboarding_status == "workspace_setup":
         next_path = "/onboarding/workspace"
@@ -120,21 +120,29 @@ async def issue_one_time_token(
 async def sign_up(
     request: SignUpRequest, settings: Settings, repository: PostgresNeedexStore
 ) -> AuthSessionResponse:
-    delivery = DeliveryService(settings)
-    delivery.ensure_api_ready()
+    requires_verification = settings.taskview_require_email_verification
+    delivery = DeliveryService(settings) if requires_verification else None
+    if delivery is not None:
+        delivery.ensure_api_ready()
     try:
         user = await repository.create_user(
             email=str(request.email).lower(),
             display_name=request.display_name,
             password_hash=password_hash.hash(request.password),
             role="requester",
-            email_verified=False,
+            email_verified=not requires_verification,
             marketing_opt_in=request.marketing_opt_in,
-            onboarding_status="email_verification",
+            onboarding_status=(
+                "email_verification" if requires_verification else "workspace_setup"
+            ),
         )
     except asyncpg.UniqueViolationError as exc:
         raise DuplicateEmailError from exc
     session = await issue_session(user, settings, repository)
+    if not requires_verification:
+        return session
+    if delivery is None:
+        raise RuntimeError("이메일 전달 서비스를 초기화하지 못했습니다.")
     verification_token, _ = await issue_one_time_token(
         user_id=user.id,
         purpose="email_verification",
@@ -151,6 +159,8 @@ async def sign_up(
 async def resend_email_verification(
     user: UserPublic, settings: Settings, repository: PostgresNeedexStore
 ) -> TokenDeliveryResponse:
+    if not settings.taskview_require_email_verification:
+        return TokenDeliveryResponse(accepted=True, expires_at=None, retry_after_seconds=0)
     if user.email_verified:
         return TokenDeliveryResponse(accepted=True, expires_at=None, retry_after_seconds=0)
     delivery = DeliveryService(settings)
@@ -309,7 +319,10 @@ async def log_in(
         raise InvalidCredentialsError
 
     await repository.record_login_success(record.user.id)
-    return await issue_session(record.user, settings, repository)
+    user = record.user
+    if not settings.taskview_require_email_verification and not user.email_verified:
+        user = await repository.mark_email_verified(user.id)
+    return await issue_session(user, settings, repository)
 
 
 async def rotate_session(
@@ -343,6 +356,8 @@ async def get_current_user(
     user = await authenticate_session(token, store)
     if user is None:
         raise HTTPException(status_code=401, detail="세션이 만료되었거나 유효하지 않습니다.")
+    if not get_settings().taskview_require_email_verification and not user.email_verified:
+        user = await store.mark_email_verified(user.id)
     return user
 
 

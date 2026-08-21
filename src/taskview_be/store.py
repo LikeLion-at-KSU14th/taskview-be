@@ -756,6 +756,28 @@ class PostgresNeedexStore:
                 UUID(user_id),
             )
 
+    async def mark_email_verified(self, user_id: str) -> UserPublic:
+        pool = self._require_pool()
+        async with pool.acquire() as connection:
+            row = await connection.fetchrow(
+                """
+                UPDATE users
+                SET email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP),
+                    onboarding_status = CASE
+                        WHEN onboarding_status = 'email_verification' THEN 'workspace_setup'
+                        ELSE onboarding_status
+                    END,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = $1
+                RETURNING id, email, display_name, role, created_at,
+                          email_verified_at, onboarding_status, auth_provider
+                """,
+                UUID(user_id),
+            )
+        if row is None:
+            raise RuntimeError("사용자를 찾을 수 없습니다.")
+        return self._to_user_public(row)
+
     async def create_session(
         self, *, user_id: str, token_hash: str, expires_at: datetime
     ) -> datetime:

@@ -152,6 +152,7 @@ def create_view(client: TestClient, auth_headers: dict[str, str], *, ttl_days: i
 def test_business_api_requires_completed_onboarding_and_active_membership(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
 
@@ -178,6 +179,7 @@ def test_business_api_requires_completed_onboarding_and_active_membership(monkey
 def test_cross_tenant_views_and_approvals_are_isolated(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
 
@@ -245,6 +247,7 @@ def test_cross_tenant_views_and_approvals_are_isolated(monkeypatch):
 def test_submission_snapshot_blocks_refine_tampering_and_self_approval(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
 
@@ -276,6 +279,7 @@ def test_submission_snapshot_blocks_refine_tampering_and_self_approval(monkeypat
 def test_submission_hash_and_revision_cas_reject_stale_state(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
 
@@ -349,6 +353,7 @@ def test_submission_hash_and_revision_cas_reject_stale_state(monkeypatch):
 def test_requester_cannot_escalate_workspace_or_admin_integrations(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
 

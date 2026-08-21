@@ -50,6 +50,7 @@ def bearer(payload: dict) -> dict[str, str]:
 def test_owner_sees_requester_and_blocked_ttl_can_be_repaired(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
     requester_email = unique_email("requester")

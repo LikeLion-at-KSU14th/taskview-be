@@ -66,7 +66,7 @@ Compose는 형제 디렉터리의 `taskview-ai`, `taskview-fe`와 Mailpit을 실
 
 ## 핵심 API
 
-- `POST /v1/auth/signup` — 요청자 계정 생성 및 세션 발급
+- `POST /v1/auth/signup` — 이메일 인증 대기 없이 요청자 계정 생성 및 세션 발급
 - `POST /v1/auth/login` — 로그인 및 세션 발급
 - `GET /v1/auth/me` — 현재 사용자 조회
 - `POST /v1/auth/session/refresh` — 기존 세션 폐기 후 새 세션 발급
@@ -205,7 +205,7 @@ cp .env.deploy.example .env.deploy
 
 - `TASKVIEW_AI_URL=https://ai.example.com`: 별도 AI 서버 주소
 - `TASKVIEW_AI_SHARED_SECRET`: AI 서버와 동일한 무작위 값
-- `TASKVIEW_PUBLIC_WEB_URL=https://taskview.example.com`: 이메일 링크에 사용할 FE 주소
+- `TASKVIEW_PUBLIC_WEB_URL=https://taskview.example.com`: 비밀번호 복구·초대 링크에 사용할 FE 주소
 - `TASKVIEW_CORS_ORIGINS`: 허용할 FE origin 목록
 
-PostgreSQL은 외부 포트를 열지 않고 Compose 내부 네트워크에서만 BE에 연결됩니다. 운영 SMTP가 설정되지 않으면 이메일 확인·비밀번호 복구·초대가 정상 동작하지 않으므로 배포 전에 실제 SMTP 값을 입력하세요.
+PostgreSQL은 외부 포트를 열지 않고 Compose 내부 네트워크에서만 BE에 연결됩니다. 신규 가입의 이메일 인증은 기본적으로 사용하지 않습니다. 운영 SMTP가 설정되지 않으면 비밀번호 복구와 워크스페이스 초대 메일은 정상 동작하지 않으므로 해당 기능을 사용할 때 실제 SMTP 값을 입력하세요.

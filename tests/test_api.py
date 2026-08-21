@@ -49,6 +49,7 @@ def unique_email(prefix: str) -> str:
 def enable_fake_ai(monkeypatch) -> None:
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
 
@@ -239,6 +240,56 @@ def test_signup_me_duplicate_logout_and_revocation(monkeypatch):
     get_settings.cache_clear()
 
 
+def test_signup_skips_email_verification_when_disabled(monkeypatch):
+    enable_fake_ai(monkeypatch)
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "false")
+    get_settings.cache_clear()
+
+
+def test_existing_unverified_session_is_promoted_when_verification_is_disabled(monkeypatch):
+    enable_fake_ai(monkeypatch)
+    email = unique_email("legacy-unverified")
+
+    with TestClient(app) as client:
+        session, headers = signup(client, email, verify=False)
+        assert session["user"]["email_verified"] is False
+
+        monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "false")
+        get_settings.cache_clear()
+        current = client.get("/v1/auth/me", headers=headers)
+        assert current.status_code == 200
+        assert current.json()["email_verified"] is True
+        assert current.json()["onboarding_status"] == "workspace_setup"
+
+        logged_in = client.post(
+            "/v1/auth/login",
+            json={"email": email, "password": TEST_PASSWORD},
+        )
+        assert logged_in.status_code == 200
+        assert logged_in.json()["user"]["email_verified"] is True
+        assert logged_in.json()["next_path"] == "/onboarding/workspace"
+
+    get_settings.cache_clear()
+    email = unique_email("no-email-verification")
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/auth/signup",
+            json={"email": email, "display_name": "바로 시작", "password": TEST_PASSWORD},
+        )
+        assert response.status_code == 201
+        payload = response.json()
+        assert payload["user"]["email_verified"] is True
+        assert payload["user"]["onboarding_status"] == "workspace_setup"
+        assert payload["next_path"] == "/onboarding/workspace"
+        assert payload["verification_token"] is None
+
+        headers = {"authorization": f"Bearer {payload['session_token']}"}
+        assert client.get("/v1/auth/me", headers=headers).json()["email_verified"] is True
+
+    get_settings.cache_clear()
+
+
 def test_email_verification_and_password_reset_tokens_are_single_use(monkeypatch):
     enable_fake_ai(monkeypatch)
     email = unique_email("identity")
@@ -356,6 +407,7 @@ def test_delivery_misconfiguration_is_explicit_and_reset_response_does_not_enume
     monkeypatch,
 ):
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "false")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.delenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", raising=False)
     monkeypatch.delenv("TASKVIEW_SMTP_HOST", raising=False)
     get_settings.cache_clear()

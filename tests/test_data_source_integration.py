@@ -82,6 +82,7 @@ def docker_data_source_environment(monkeypatch):
         pytest.skip("The real data-source integration suite runs on the Docker network")
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     monkeypatch.setenv("TASKVIEW_DATA_SOURCE_ENCRYPTION_KEY", DATA_SOURCE_KEY)
     monkeypatch.setenv("TASKVIEW_DATA_SOURCE_ALLOWED_HOSTNAMES", "postgres")

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     taskview_login_max_failures: int = 5
     taskview_login_lock_minutes: int = 15
     taskview_email_token_minutes: int = 30
+    taskview_require_email_verification: bool = False
     taskview_password_reset_minutes: int = 30
     taskview_expose_dev_tokens: bool = False
     taskview_delivery_encryption_key: SecretStr | None = None

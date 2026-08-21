@@ -128,6 +128,7 @@ def seed_owner() -> tuple[str, str]:
 def test_page_contracts_and_safe_alternative_flow(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
     owner_email, owner_password = seed_owner()
@@ -290,6 +291,7 @@ def test_page_contracts_and_safe_alternative_flow(monkeypatch):
 def test_page_contracts_keep_object_level_authorization(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
 
@@ -325,6 +327,7 @@ def test_page_contracts_keep_object_level_authorization(monkeypatch):
 def test_creation_journey_is_refresh_safe_and_submission_is_idempotent(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     get_settings.cache_clear()
     owner_email, owner_password = seed_owner()

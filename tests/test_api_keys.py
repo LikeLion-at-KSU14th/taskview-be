@@ -46,6 +46,7 @@ async def cleanup_test_rows() -> None:
 def isolate_database_rows(monkeypatch):
     monkeypatch.setenv("TASKVIEW_BE_FAKE_AI", "true")
     monkeypatch.setenv("TASKVIEW_EXPOSE_DEV_TOKENS", "true")
+    monkeypatch.setenv("TASKVIEW_REQUIRE_EMAIL_VERIFICATION", "true")
     monkeypatch.setenv("TASKVIEW_DELIVERY_ENCRYPTION_KEY", DELIVERY_KEY)
     monkeypatch.setenv("TASKVIEW_MAIL_WORKER_ENABLED", "false")
     get_settings.cache_clear()
